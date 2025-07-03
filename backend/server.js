@@ -1,28 +1,37 @@
 require('dotenv').config();
-const express = require('express');
-const app = express();
+const express = require('express'); // Express module included
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
 const authRoutes = require('./src/routes/authRoutes');
-app.use(express.json());
-app.use(cookieParser());
-mongoose.connect(process.env.MONGO_URI).then(() => console.log('MongoDB connected successfully')).catch((e) => console.error(`Error connecting to MongoDB: ${e.message}`));
+const linksRoutes = require('./src/routes/linksRoutes');
+const userRoutes = require('./src/routes/userRoutes');
 
-const corsOptions ={
-    origin : process.env.CLIENT_URL || 'http://localhost:3000',
-    credentials : true,
-}
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('Database connected'))
+    .catch(error => console.log(error));
+
+const app = express(); // Instance of express application
+
+app.use(express.json()); // Middleware
+app.use(cookieParser()); // Middleware
+
+const corsOptions = {
+    origin: process.env.CLIENT_ENDPOINT,
+    credentials: true
+};
 app.use(cors(corsOptions));
 
-app.use('/auth',authRoutes);
+app.use('/auth', authRoutes);
+app.use('/links', linksRoutes);
+app.use('/users', userRoutes);
 
-const PORT =5000;
-app.listen(PORT, (e)=>{
-    if(e){
-        console.error(`Error starting server: ${e.message}`);
-    }else{
-        console.log(`Server is running on port ${PORT}`);
+const PORT = 5000;
+app.listen(PORT, (error) => {
+    if (error) {
+        console.log('Server not started: ', error);
+    } else {
+        console.log(`Server is running on http://localhost:${PORT}`)
     }
-})
+});
