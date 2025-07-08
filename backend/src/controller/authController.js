@@ -32,7 +32,9 @@ const authController = {
                 email: data.email,
                 // This is the ensure backward compatibility
                 role: data.role ? data.role : 'admin',
-                adminId: data.adminId
+                adminId: data.adminId,
+                credits: data.credits,
+                subscription: data.subscription
             };
             const token = jwt.sign(userDetails, secret, { expiresIn: '1h' });
 
@@ -54,18 +56,19 @@ const authController = {
         response.json({ message: 'User logged out successfully' });
     },
 
-    isUserLoggedIn: (request, response) => {
+    isUserLoggedIn: async (request, response) => {
         const token = request.cookies.jwtToken;
 
         if (!token) {
             return response.status(401).json({ message: 'Unauthorized access' });
         }
 
-        jwt.verify(token, secret, (error, userDetails) => {
+        jwt.verify(token, secret, async (error, userDetails) => {
             if (error) {
                 return response.status(401).json({ message: 'Unauthorized access' });
             } else {
-                return response.json({ userDetails: userDetails });
+                const data = await Users.findById({ _id: userDetails.id });
+                return response.json({ userDetails: data });
             }
         });
     },
@@ -93,7 +96,8 @@ const authController = {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: 'admin'
+                role: 'admin',
+                credits: user.credits
             };
             const token = jwt.sign(userDetails, secret, { expiresIn: '1h' });
 
@@ -143,7 +147,8 @@ const authController = {
                 id: data._id ? data._id : googleId,
                 username: email,
                 name: name,
-                role: data.role? data.role : 'admin'
+                role: data.role? data.role : 'admin',
+                credits: data.credits
             };
 
             const token = jwt.sign(user, secret, { expiresIn: '1h' });
