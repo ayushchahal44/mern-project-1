@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const subscriptionSchema = new mongoose.Schema({
     id: { type: String }, // Razorpay subscription id
-    status: { type: String, default: 'pending' },
+    status: { type: String},
     start: { type: Date },
     end: { type: Date },
     lastBillDate: { type: Date },
